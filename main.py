@@ -26,40 +26,31 @@ def view_task():
 
 
 def edit_task():
-    if not user_task:
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks")
+    task_view = cursor.fetchall()
+    task_ids = []
+    if not task_view:
         print("There are no current tasks to edit.\n\n")
         return
     else:
-        for i, task in enumerate(user_task, 1):
-            print(f"{i}. {task}")
+        for task in task_view:
+            print(f"{task[0]}. {task[1]}")
+            task_ids.append(task[0])
         try:
-            edit_num = int(input("Pick which task you would like to edit\n"))
-            if edit_num < 1 or edit_num > len(user_task):
+            edit_num = int(input("Pick enter the integer task you would like to edit\n"))
+            if edit_num < 1 or edit_num not in task_ids:
                 print("Task number out of range.\n")
                 return
             new_task = input("Enter your edits\n")
-            user_task[edit_num - 1] = new_task
+            cursor.execute("UPDATE tasks set title = ? WHERE task_id = ?", (new_task, edit_num,))
+            conn.commit()
             print("Task has been updated\n")
         except ValueError:
             print("Please enter a valid task number!\n")
-            return
-
-
-def save_task():
-    with open("tasks.txt", "w") as file:
-        for i in user_task:
-            file.write(i + "\n")
-
-
-def load_task():
-    try:
-        with open("tasks.txt", "r") as file:
-            user_task.clear()
-            lines = file.readlines()
-            for line in lines:
-                user_task.append(line.strip())
-    except FileNotFoundError:
-        pass
+        finally:
+            conn.close()
 
 
 def delete_task():
@@ -81,7 +72,6 @@ def delete_task():
 
 create_table()
 user_task = []
-load_task()
 
 while True:
     user_options = input(
@@ -95,15 +85,12 @@ while True:
 
     if user_options == "A":
         add_task()
-        save_task()
     elif user_options == "V":
         view_task()
     elif user_options == "D":
         delete_task()
-        save_task()
     elif user_options == "E":
         edit_task()
-        save_task()
     elif user_options == "Q":
         print("Thank you and see you next time!")
         exit()
