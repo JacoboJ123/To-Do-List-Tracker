@@ -13,11 +13,16 @@ def add_task():
 
 
 def view_task():
-    if not user_task:
-        print("There are no current tasks.\n\n")
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT title, description, created_at, streak FROM tasks")
+    task_view = cursor.fetchall()
+    if not task_view:
+        print("Empty table")
     else:
-        for i, task in enumerate(user_task, 1):
-            print(f"{i}. {task}")
+        for i, task in enumerate(task_view, 1):
+            print(f"{i}. {task[0]} {task[1]}")
+    conn.close()
 
 
 def edit_task():
