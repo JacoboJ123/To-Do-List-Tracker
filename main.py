@@ -1,7 +1,14 @@
+import sqlite3
+from db_setup import create_table
+
 # to do list add, view, remove
 def add_task():
-    add_task = input("Enter your task.\n")
-    user_task.append(add_task)
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+    title_task = input("Enter your task: ")
+    cursor.execute("INSERT INTO tasks(title) VALUES(?)", (title_task,))
+    conn.commit()
+    conn.close()
     print("Task has been added.\n")
 
 
@@ -67,7 +74,7 @@ def delete_task():
         print("Please enter a valid task number!\n")
         return
 
-
+create_table()
 user_task = []
 load_task()
 
