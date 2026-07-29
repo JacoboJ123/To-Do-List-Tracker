@@ -54,24 +54,32 @@ def edit_task():
 
 
 def delete_task():
-    if not user_task:
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks")
+    task_view = cursor.fetchall()
+    task_ids = []
+    if not task_view:
         print("There are no tasks to delete\n\n")
         return
-    for i, task in enumerate(user_task, 1):
-        print(f"{i}. {task}")
-    try:
-        delete_num = int(input("Please choose a task to delete\n"))
-        if delete_num < 1 or delete_num > len(user_task):
-            print("Task number out of range.\n")
-            return
-        user_task.pop(delete_num - 1)
-        print("Task was deleted.\n")
-    except ValueError:
-        print("Please enter a valid task number!\n")
-        return
+    else:
+        for task in task_view:
+            print(f"{task[0]}, {task[1]}")
+            task_ids.append(task[0])
+        try:
+            delete_num = int(input("Please choose a task to delete:\n"))
+            if delete_num < 1 or delete_num not in task_ids:
+                print("Task number out of range.\n")
+                return
+            cursor.execute("DELETE FROM tasks WHERE task_id = ?", (delete_num,))
+            conn.commit()
+            print("Task was deleted.\n")
+        except ValueError:
+            print("Please enter a valid task number!\n")
+        finally:
+            conn.close()
 
 create_table()
-user_task = []
 
 while True:
     user_options = input(
