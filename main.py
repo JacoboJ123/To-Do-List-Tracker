@@ -64,7 +64,7 @@ def delete_task():
         return
     else:
         for task in task_view:
-            print(f"{task[0]}, {task[1]}")
+            print(f"{task[0]}. {task[1]}")
             task_ids.append(task[0])
         try:
             delete_num = int(input("Please choose a task to delete:\n"))
