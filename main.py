@@ -98,24 +98,33 @@ def complete_task():
             if complete not in task_ids:
                 print("Int out of range")
                 return
-            last_complete = cursor.execute("UPDATE tasks WHERE task_id = ?", (complete,))
+            cursor.execute("SELECT last_completed FROM tasks WHERE task_id = ?", (complete,))
+            last_complete = cursor.fetchone()
             time = datetime.date.today()
-            if last_complete is None:
+            if last_complete[0] is None:
                 cursor.execute("UPDATE tasks SET streak = 1, last_completed = ? WHERE task_id = ?", (time, complete, ))
                 conn.commit()
-            # need to compare last_completed to time now to determine if the streak broke or not
-            elif last_complete > time:
-
-
+                print("Completed Streak is now 1 keep it up!")
+                return
+            last_date = datetime.date.fromisoformat(last_complete[0])
+            days_apart = (time - last_date).days
+            if days_apart == 0:
+                print("Task already completed, no Streak change")
+            elif days_apart == 1:
+                cursor.execute("SELECT streak FROM tasks WHERE task_id = ?", (complete,))
+                row = cursor.fetchone()
+                streak_count = row[0] + 1
+                cursor.execute("UPDATE tasks SET streak = ?, last_completed = ? WHERE task_id = ?", ( streak_count, time, complete, ))
+                conn.commit()
                 print("Task marked completed")
+            else:
+                cursor.execute("UPDATE tasks SET streak = 1, last_completed = ? WHERE task_id = ?", (time, complete,))
+                conn.commit()
+                print("Your streak was broken")
         except ValueError:
             print("Please enter a valid task number.")
         finally:
             conn.close()
-
-
-def streak():
-    pass
 
 create_table()
 
@@ -125,6 +134,7 @@ while True:
         "'A' to add a new task\n"
         "'V' to view your current tasks\n"
         "'E' to edit a task\n"
+        "'C' to mark a task complete\n"
         "'D' to delete a task\n"
         "'Q' to quit.\n"
     ).upper()
@@ -137,6 +147,8 @@ while True:
         delete_task()
     elif user_options == "E":
         edit_task()
+    elif user_options == "C":
+        complete_task()
     elif user_options == "Q":
         print("Thank you and see you next time!")
         exit()
