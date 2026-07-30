@@ -2,12 +2,14 @@ import sqlite3
 import datetime
 from db_setup import create_table
 
-# to do list add, view, remove
 def add_task():
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
-    title_task = input("Enter your task: ")
-    cursor.execute("INSERT INTO tasks(title) VALUES(?)", (title_task,))
+    title_task = input("Enter your task: ").strip()
+    task_description = input("Enter the task description (or press Enter to skip): ").strip()
+    if task_description == "":
+        task_description = None
+    cursor.execute("INSERT INTO tasks(title, description) VALUES(?, ?)", (title_task, task_description))
     conn.commit()
     conn.close()
     print("Task has been added.\n")
@@ -16,13 +18,25 @@ def add_task():
 def view_task():
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT title, description, created_at, streak FROM tasks")
+    cursor.execute("SELECT * FROM tasks")
     task_view = cursor.fetchall()
     if not task_view:
         print("Empty table")
     else:
         for i, task in enumerate(task_view, 1):
-            print(f"{i}. {task[0]} {task[1]}")
+            task_id, title, description, created_at, enddate, streak, last_completed = task
+            line = f"{i}. {title}"
+            if description:
+                line += f" Desc: {description}."
+            if created_at:
+                line += f" Created: {created_at}"
+            if enddate:
+                line += f" Due: {enddate}"
+            if streak:
+                line+= f" Streak: {streak}"
+            if last_completed:
+                line += f" {last_completed}"
+            print(line)
     conn.close()
 
 
@@ -117,7 +131,7 @@ def complete_task():
                 streak_count = row[0] + 1
                 cursor.execute("UPDATE tasks SET streak = ?, last_completed = ? WHERE task_id = ?", ( streak_count, time, complete, ))
                 conn.commit()
-                print("Task marked completed")
+                print(f"Task marked completed. Streak count: {streak_count}")
             else:
                 cursor.execute("UPDATE tasks SET streak = 1, last_completed = ? WHERE task_id = ?", (time, complete,))
                 conn.commit()
