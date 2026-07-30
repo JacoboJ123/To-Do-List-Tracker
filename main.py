@@ -100,14 +100,15 @@ def complete_task():
                 return
             cursor.execute("SELECT last_completed FROM tasks WHERE task_id = ?", (complete,))
             last_complete = cursor.fetchone()
-            time = datetime.date.today()
+            today = datetime.date.today()
+            time = today.isoformat()
             if last_complete[0] is None:
                 cursor.execute("UPDATE tasks SET streak = 1, last_completed = ? WHERE task_id = ?", (time, complete, ))
                 conn.commit()
                 print("Completed Streak is now 1 keep it up!")
                 return
             last_date = datetime.date.fromisoformat(last_complete[0])
-            days_apart = (time - last_date).days
+            days_apart = (today - last_date).days
             if days_apart == 0:
                 print("Task already completed, no Streak change")
             elif days_apart == 1:
