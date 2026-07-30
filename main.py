@@ -1,4 +1,5 @@
 import sqlite3
+import datetime
 from db_setup import create_table
 
 # to do list add, view, remove
@@ -78,6 +79,43 @@ def delete_task():
             print("Please enter a valid task number!\n")
         finally:
             conn.close()
+
+def complete_task():
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks")
+    task_view = cursor.fetchall()
+    task_ids = []
+    if not task_view:
+        print("Empty table")
+        return
+    else:
+        for task in task_view:
+            print(f"{task[0]}. {task[1]}")
+            task_ids.append(task[0])
+        try:
+            complete = int(input("Enter a task # you would like to mark as complete: "))
+            if complete not in task_ids:
+                print("Int out of range")
+                return
+            last_complete = cursor.execute("UPDATE tasks WHERE task_id = ?", (complete,))
+            time = datetime.date.today()
+            if last_complete is None:
+                cursor.execute("UPDATE tasks SET streak = 1, last_completed = ? WHERE task_id = ?", (time, complete, ))
+                conn.commit()
+            # need to compare last_completed to time now to determine if the streak broke or not
+            elif last_complete > time:
+
+
+                print("Task marked completed")
+        except ValueError:
+            print("Please enter a valid task number.")
+        finally:
+            conn.close()
+
+
+def streak():
+    pass
 
 create_table()
 

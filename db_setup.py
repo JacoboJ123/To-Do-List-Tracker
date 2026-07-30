@@ -10,6 +10,7 @@ def create_table():
     "description TEXT," \
     "created_at TEXT DEFAULT CURRENT_TIMESTAMP," \
     "enddate NUMERIC," \
-    "streak INTEGER DEFAULT 0)")
+    "streak INTEGER DEFAULT 0," \
+    "last_completed TEXT)")
     connct.commit()
     connct.close()
