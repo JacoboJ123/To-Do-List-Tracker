@@ -62,7 +62,6 @@ def edit_task():
             if edit_num < 1 or edit_num not in task_ids:
                 print("Task number out of range.\n")
                 return
-            # need to add a check to either update title or desc based on user input (below)
             edit_title = input("Enter your title edit(s) (Press enter to skip): ")
             edit_desc = input("Enter yout description edit(s) (Press enter to skip): ")
             update, values = [], []
