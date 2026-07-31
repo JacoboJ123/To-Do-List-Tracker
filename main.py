@@ -43,7 +43,7 @@ def view_task():
 def edit_task():
     conn = sqlite3.connect("tasks.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM tasks")
+    cursor.execute("SELECT task_id, title, description FROM tasks")
     task_view = cursor.fetchall()
     task_ids = []
     if not task_view:
@@ -51,15 +51,32 @@ def edit_task():
         return
     else:
         for task in task_view:
-            print(f"{task[0]}. {task[1]}")
+            task_id, title, description = task
+            line = f"{task[0]}. {title}"
+            if description:
+                line += f" Desc: {description}."
+            print(line)
             task_ids.append(task[0])
         try:
-            edit_num = int(input("Pick enter the integer task you would like to edit\n"))
+            edit_num = int(input("Enter the integer task you would like to edit\n"))
             if edit_num < 1 or edit_num not in task_ids:
                 print("Task number out of range.\n")
                 return
-            new_task = input("Enter your edits\n")
-            cursor.execute("UPDATE tasks set title = ? WHERE task_id = ?", (new_task, edit_num,))
+            # need to add a check to either update title or desc based on user input (below)
+            edit_title = input("Enter your title edit(s) (Press enter to skip): ")
+            edit_desc = input("Enter yout description edit(s) (Press enter to skip): ")
+            update, values = [], []
+            if edit_title != "":
+                update.append("title = ?")
+                values.append(edit_title)
+            if edit_desc != "":
+               update.append("description = ?")
+               values.append(edit_desc)
+            if not update:
+               print("Nothing to update")
+               return
+            query_on = ", ".join(update)
+            cursor.execute(f"UPDATE tasks set {query_on} WHERE task_id = ?", (*values, edit_num))
             conn.commit()
             print("Task has been updated\n")
         except ValueError:
