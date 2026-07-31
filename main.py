@@ -96,7 +96,7 @@ def delete_task():
         return
     else:
         for task in task_view:
-            print(f"{task[0]}. {task[1]}")
+            print(f"{task[0]}. Title: {task[1]} Desc: {task[2]}.")
             task_ids.append(task[0])
         try:
             delete_num = int(input("Please choose a task to delete:\n"))
@@ -122,7 +122,7 @@ def complete_task():
         return
     else:
         for task in task_view:
-            print(f"{task[0]}. {task[1]}")
+            print(f"{task[0]}. Title: {task[1]}  Desc: {task[2]}. Streak: {task[5]}")
             task_ids.append(task[0])
         try:
             complete = int(input("Enter a task # you would like to mark as complete: "))
